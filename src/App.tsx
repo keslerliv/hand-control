@@ -1,10 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { HandLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 import Webcam from "react-webcam";
 
 import { getGlobalDistance } from "./utils";
 
 function App() {
+  const [zoom, setZoom] = useState(0);
+  const [rotateX, setRotateX] = useState(0);
+  const [rotateY, setRotateY] = useState(0);
+
+  let initialRotateX = 0;
+  let initialRotateY = 0;
+
+  let lastRotateX = 0;
+  let lastRotateY = 0;
+
   // process landmarks functions
   const processResults = (detections: any) => {
     if (detections.worldLandmarks[0]) {
@@ -12,7 +22,30 @@ function App() {
 
       // palm hand position
       if (getGlobalDistance(lm[12], lm[9]) > 0.07) {
-        console.log("opened");
+        const positionX = detections.landmarks[0][0].x;
+        const positionY = detections.landmarks[0][0].y;
+
+        if (
+          (lastRotateX === 0 && lastRotateY === 0) ||
+          positionX - lastRotateX > 0.1 ||
+          positionX - lastRotateX < -0.1 ||
+          positionY - lastRotateY > 0.1 ||
+          positionY - lastRotateY < -0.1
+        ) {
+          lastRotateX = positionX;
+          lastRotateY = positionY;
+        }
+
+        // set current rotations
+        initialRotateX = initialRotateX + (positionX - lastRotateX);
+        setRotateX(initialRotateX);
+
+        initialRotateY = initialRotateY + (positionY - lastRotateY);
+        setRotateY(initialRotateY);
+
+        lastRotateX = positionX;
+        lastRotateY = positionY;
+
         return;
       }
 
@@ -24,8 +57,7 @@ function App() {
       ) {
         const distance = getGlobalDistance(lm[4], lm[8]);
         const percent = ((distance - 0.005) / (0.1 - 0.005)) * 100;
-
-        console.log(percent);
+        setZoom(Math.round(percent));
         return;
       }
     }
@@ -77,6 +109,10 @@ function App() {
 
   return (
     <center>
+      <p>Zoom: {zoom}</p>
+      <p>
+        Rotate: x {rotateX}, y {rotateY}
+      </p>
       <div className="App">
         <Webcam
           id="video"
