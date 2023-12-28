@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { HandLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
-import Webcam from "react-webcam";
 
 import { getGlobalDistance } from "./utils";
+import WebcamApp from "./components/Cam";
+import { SceneApp } from "./components/Scene";
 
 function App() {
   const [zoom, setZoom] = useState(0);
@@ -108,28 +109,10 @@ function App() {
   }, []);
 
   return (
-    <center>
-      <p>Zoom: {zoom}</p>
-      <p>
-        Rotate: x {rotateX}, y {rotateY}
-      </p>
-      <div className="App">
-        <Webcam
-          id="video"
-          style={{
-            position: "absolute",
-            marginLeft: "auto",
-            marginRight: "auto",
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            zIndex: 9,
-            width: 640,
-            height: 480,
-          }}
-        />
-      </div>
-    </center>
+    <>
+      <WebcamApp />
+      <SceneApp />
+    </>
   );
 }
 
